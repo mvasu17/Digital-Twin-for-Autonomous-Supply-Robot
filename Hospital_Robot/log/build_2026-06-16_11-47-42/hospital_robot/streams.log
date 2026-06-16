@@ -1,0 +1,17 @@
+[0.513s] Invoking command in '/home/vasu/hospital_robot_ws/build/hospital_robot': PYTHONPATH=/home/vasu/hospital_robot_ws/build/hospital_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/vasu/hospital_robot_ws/install/hospital_robot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/vasu/hospital_robot_ws/build/hospital_robot/build --no-deps symlink_data
+[0.718s] running develop
+[0.852s] running egg_info
+[0.852s] writing hospital_robot.egg-info/PKG-INFO
+[0.852s] writing dependency_links to hospital_robot.egg-info/dependency_links.txt
+[0.852s] writing entry points to hospital_robot.egg-info/entry_points.txt
+[0.852s] writing requirements to hospital_robot.egg-info/requires.txt
+[0.852s] writing top-level names to hospital_robot.egg-info/top_level.txt
+[0.853s] reading manifest file 'hospital_robot.egg-info/SOURCES.txt'
+[0.854s] writing manifest file 'hospital_robot.egg-info/SOURCES.txt'
+[0.855s] running build_ext
+[0.856s] Creating /home/vasu/hospital_robot_ws/install/hospital_robot/lib/python3.10/site-packages/hospital-robot.egg-link (link to .)
+[0.856s] Installing robot_node script to /home/vasu/hospital_robot_ws/install/hospital_robot/lib/hospital_robot
+[0.857s] 
+[0.857s] Installed /home/vasu/hospital_robot_ws/build/hospital_robot
+[0.857s] running symlink_data
+[0.884s] Invoked command in '/home/vasu/hospital_robot_ws/build/hospital_robot' returned '0': PYTHONPATH=/home/vasu/hospital_robot_ws/build/hospital_robot/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/vasu/hospital_robot_ws/install/hospital_robot/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/vasu/hospital_robot_ws/build/hospital_robot/build --no-deps symlink_data

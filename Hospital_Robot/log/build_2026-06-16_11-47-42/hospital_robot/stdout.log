@@ -1,0 +1,15 @@
+running develop
+running egg_info
+writing hospital_robot.egg-info/PKG-INFO
+writing dependency_links to hospital_robot.egg-info/dependency_links.txt
+writing entry points to hospital_robot.egg-info/entry_points.txt
+writing requirements to hospital_robot.egg-info/requires.txt
+writing top-level names to hospital_robot.egg-info/top_level.txt
+reading manifest file 'hospital_robot.egg-info/SOURCES.txt'
+writing manifest file 'hospital_robot.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/vasu/hospital_robot_ws/install/hospital_robot/lib/python3.10/site-packages/hospital-robot.egg-link (link to .)
+Installing robot_node script to /home/vasu/hospital_robot_ws/install/hospital_robot/lib/hospital_robot
+
+Installed /home/vasu/hospital_robot_ws/build/hospital_robot
+running symlink_data
