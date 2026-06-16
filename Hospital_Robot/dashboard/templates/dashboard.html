@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hospital Stock Robot Dashboard</title>
+<style>
+:root {
+  --bg:     #0a0e1a;
+  --panel:  #111827;
+  --panel2: #1a2235;
+  --border: #1e293b;
+  --blue:   #3b82f6;
+  --green:  #22c55e;
+  --yellow: #f59e0b;
+  --red:    #ef4444;
+  --text:   #e2e8f0;
+  --muted:  #64748b;
+  --radius: 12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+header {
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top:0; z-index:100;
+}
+.logo { display:flex; align-items:center; gap:12px; }
+.logo-icon {
+  width:38px; height:38px;
+  background: linear-gradient(135deg,#3b82f6,#6366f1);
+  border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px;
+}
+.logo h1  { font-size:17px; font-weight:700; }
+.logo p   { font-size:11px; color:var(--muted); }
+.hdr-r    { display:flex; align-items:center; gap:14px; }
+#clock    { font-size:13px; color:var(--muted); }
+.dot      { width:8px; height:8px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ── Layout ── */
+.main { padding:22px 28px; display:grid; gap:22px; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+
+/* ── Cards ── */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.4);
+}
+.card-title {
+  font-size:12px; text-transform:uppercase; letter-spacing:.08em;
+  color:var(--muted); margin-bottom:14px;
+  display:flex; align-items:center; gap:7px;
+}
+
+/* ── Stock cards ── */
+.stock-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  border-top: 3px solid var(--green);
+  transition: transform .2s;
+}
+.stock-card:hover { transform:translateY(-2px); }
+.stock-card.warning  { border-top-color: var(--yellow); }
+.stock-card.critical { border-top-color: var(--red); animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.7} }
+
+.stock-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.stock-icon   { font-size:26px; }
+.badge {
+  font-size:10px; font-weight:700; padding:3px 9px;
+  border-radius:20px; text-transform:uppercase;
+}
+.badge-ok       { background:#052e16; color:var(--green); }
+.badge-warning  { background:#2d1b00; color:var(--yellow); }
+.badge-critical { background:#2d0a0a; color:var(--red); }
+.badge-source   { background:#1e3a5f; color:#60a5fa; }
+
+.stock-val  { font-size:40px; font-weight:800; line-height:1; margin-bottom:3px; }
+.stock-lbl  { font-size:12px; color:var(--muted); margin-bottom:14px; }
+
+.prog-bg    { height:7px; background:var(--border); border-radius:4px; overflow:hidden; margin-bottom:7px; }
+.prog-fill  { height:100%; border-radius:4px; transition:width .5s, background .3s; }
+
+.stock-foot { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:6px; }
+
+.btn {
+  width:100%; margin-top:12px; padding:8px;
+  border:none; border-radius:8px;
+  background:var(--panel2); color:var(--text);
+  font-size:11px; cursor:pointer; transition:background .2s;
+  display:flex; align-items:center; justify-content:center; gap:5px;
+}
+.btn:hover { background:var(--blue); }
+
+/* ── Map ── */
+canvas#map { width:100%; height:360px; display:block; border-radius:8px; }
+.legend    { display:flex; gap:14px; margin-top:10px; flex-wrap:wrap; }
+.leg-item  { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--muted); }
+.leg-dot   { width:9px; height:9px; border-radius:50%; }
+
+/* ── Robot status ── */
+.rob-grid  { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px; }
+.rob-met   { background:var(--panel2); border-radius:8px; padding:11px; }
+.rob-met-l { font-size:10px; color:var(--muted); margin-bottom:3px; }
+.rob-met-v { font-size:17px; font-weight:700; }
+
+/* ── Alert bar ── */
+.alert-bar {
+  border-radius:8px; padding:10px 15px;
+  font-size:13px; display:flex; align-items:center; gap:9px;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:var(--panel); }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+@media(max-width:1100px){ .grid-3{grid-template-columns:1fr 1fr} .grid-2{grid-template-columns:1fr} }
+@media(max-width:700px) { .grid-3{grid-template-columns:1fr} .main{padding:14px} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🤖</div>
+    <div>
+      <h1>Hospital Stock Robot</h1>
+      <p>AI-Powered Inventory Management</p>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <span id="clock">--:--:--</span>
+    <div class="dot"></div>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- Alert bar -->
+  <div class="alert-bar" id="alert-bar" style="background:#1a2200;border:1px solid #3d3d00;color:#f59e0b">
+    ⚡ System online — monitoring stock levels
+  </div>
+
+  <!-- Stock cards -->
+  <div>
+    <div class="card-title">📦 Live Stock Levels</div>
+    <div class="grid-3" id="stock-cards"></div>
+  </div>
+
+  <!-- Map + Robot status -->
+  <div class="grid-2">
+
+    <div class="card">
+      <div class="card-title">🗺️ Hospital Floor Map &amp; Robot Position</div>
+      <canvas id="map" width="620" height="360"></canvas>
+      <div class="legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#3b82f6"></div>Robot</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#22c55e"></div>OK</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#f59e0b"></div>Warning ≤55</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#ef4444"></div>Critical ≤30</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#818cf8"></div>Robot Path</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🤖 Robot Status</div>
+      <div style="text-align:center;font-size:56px;margin:8px 0" id="rob-emoji">🤖</div>
+      <div style="text-align:center;margin-bottom:14px">
+        <span id="rob-status-text"
+          style="font-size:15px;font-weight:700;padding:5px 16px;border-radius:20px;background:#1e293b">
+          Idle at Pharmacy
+        </span>
+      </div>
+      <div class="rob-grid">
+        <div class="rob-met"><div class="rob-met-l">Position X</div><div class="rob-met-v" id="rob-x">-13.0</div></div>
+        <div class="rob-met"><div class="rob-met-l">Position Y</div><div class="rob-met-v" id="rob-y">9.0</div></div>
+        <div class="rob-met"><div class="rob-met-l">Current Task</div><div class="rob-met-v" id="rob-task">—</div></div>
+        <div class="rob-met"><div class="rob-met-l">Carrying</div><div class="rob-met-v" id="rob-carrying">0 units</div></div>
+      </div>
+      <div style="margin-top:12px">
+        <div style="font-size:10px;color:var(--muted);margin-bottom:6px">Medicine Load</div>
+        <div style="background:var(--panel2);border-radius:8px;padding:12px;display:flex;align-items:center;gap:12px">
+          <span style="font-size:28px" id="rob-load-icon">📭</span>
+          <div>
+            <div id="rob-load-text" style="font-size:15px;font-weight:700;color:var(--muted)">Empty — idle at Pharmacy</div>
+            <div class="prog-bg" style="margin-top:6px;width:180px">
+              <div class="prog-fill" id="load-bar" style="width:0%;background:var(--blue)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- end .main -->
+
+<script>
+// ── Clock ──────────────────────────────────────────────────────
+setInterval(() => {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString();
+}, 1000);
+
+// ── Map canvas ─────────────────────────────────────────────────
+const canvas = document.getElementById('map');
+const ctx    = canvas.getContext('2d');
+
+// World bounds for this layout
+const WX_MIN = -20, WX_MAX = 16;
+const WY_MIN = -11, WY_MAX = 14;
+
+function w2c(wx, wy) {
+  const cw = canvas.width, ch = canvas.height;
+  return [
+    ((wx - WX_MIN) / (WX_MAX - WX_MIN)) * cw,
+    ((WY_MAX - wy) / (WY_MAX - WY_MIN)) * ch
+  ];
+}
+
+// Rooms — matched to hospital.world exactly
+const ROOMS = {
+  pharmacy:     { wx:-13, wy: 9,    w:10, h: 8, fill:'#060e28', border:'#3b82f6', label:'💊 Pharmacy',     role:'SOURCE'      },
+  icu:          { wx:-12, wy: 0.5,  w:12, h: 7, fill:'#1c0404', border:'#ef4444', label:'🏥 ICU',          role:'destination' },
+  general_ward: { wx: 10, wy:-5,    w: 8, h: 8, fill:'#041006', border:'#22c55e', label:'🛏️ General Ward', role:'destination' },
+};
+
+// Corridors
+const CORRS = [
+  { wx:-5,    wy: 9,    w:6, h:3   },   // PH corridor
+  { wx:-4,    wy: 1,    w:4, h:3   },   // ICU corridor
+  { wx: 0,    wy: 2,    w:4, h:18  },   // V-main
+  { wx: 4,    wy:-5.25, w:4, h:3.5 },   // W corridor
+];
+
+const ALERT_C = { ok:'#22c55e', warning:'#f59e0b', critical:'#ef4444' };
+let currentState = null;
+
+function drawMap(state) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Background
+  ctx.fillStyle = '#060a12';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Grid
+  ctx.strokeStyle = '#0d1525';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < canvas.width;  x += 26) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke(); }
+  for (let y = 0; y < canvas.height; y += 26) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y);  ctx.stroke(); }
+
+  // Corridors
+  for (const c of CORRS) {
+    const [x, y]   = w2c(c.wx - c.w/2, c.wy + c.h/2);
+    const [x2, y2] = w2c(c.wx + c.w/2, c.wy - c.h/2);
+    ctx.fillStyle = '#101828';
+    ctx.fillRect(x, y, x2-x, y2-y);
+    ctx.strokeStyle = '#1a2535'; ctx.lineWidth = 0.8;
+    ctx.strokeRect(x, y, x2-x, y2-y);
+  }
+
+  // Rooms
+  const stocks = state ? state.stocks : {};
+  for (const [key, room] of Object.entries(ROOMS)) {
+    const [x, y]   = w2c(room.wx - room.w/2, room.wy + room.h/2);
+    const [x2, y2] = w2c(room.wx + room.w/2, room.wy - room.h/2);
+    const rw = x2-x, rh = y2-y;
+
+    const s       = stocks[key];
+    const alert   = s ? s.alert_level : 'ok';
+    const isSrc   = room.role === 'SOURCE';
+    const bcolor  = isSrc ? '#3b82f6' : (ALERT_C[alert] || room.border);
+
+    // Fill
+    ctx.fillStyle = room.fill;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, rw, rh, 6);
+    else ctx.rect(x, y, rw, rh);
+    ctx.fill();
+
+    // Border
+    ctx.strokeStyle = bcolor;
+    ctx.lineWidth   = alert === 'critical' ? 3 : 2;
+    ctx.stroke();
+
+    // Label
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'bold 11px Segoe UI';
+    ctx.textAlign = 'center';
+    ctx.fillText(room.label, x + rw/2, y + rh/2 - 8);
+
+    // Stock value — pharmacy hides the text label
+    if (s) {
+      if (!isSrc) {
+        ctx.fillStyle = bcolor;
+        ctx.font = 'bold 13px Segoe UI';
+        ctx.textAlign = 'center';
+        const val = `${Math.round(s.current_stock)} / 100`;
+        ctx.fillText(val, x + rw/2, y + rh/2 + 9);
+      }
+
+      // Mini bar (destinations only)
+      if (!isSrc) {
+        const bw = rw * 0.68, bx = x + rw*0.16, by = y + rh - 14;
+        const pct = Math.min(1, s.current_stock / s.max_stock);
+        ctx.fillStyle = '#1e293b'; ctx.fillRect(bx, by, bw, 5);
+        ctx.fillStyle = bcolor;   ctx.fillRect(bx, by, bw * pct, 5);
+      }
+    }
+  }
+
+  // Robot path
+  if (state && state.robot && state.robot.path && state.robot.path.length > 1) {
+    ctx.strokeStyle = '#818cf8';
+    ctx.lineWidth = 2; ctx.setLineDash([4,4]);
+    ctx.beginPath();
+    const [sx, sy] = w2c(state.robot.path[0][0], state.robot.path[0][1]);
+    ctx.moveTo(sx, sy);
+    for (let i = 1; i < state.robot.path.length; i++) {
+      const [px, py] = w2c(state.robot.path[i][0], state.robot.path[i][1]);
+      ctx.lineTo(px, py);
+    }
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+
+  // Robot dot
+  if (state && state.robot) {
+    const [rx, ry] = w2c(state.robot.x, state.robot.y);
+    const rgb = state.robot.status === 'refilling' ? '34,197,94'
+              : state.robot.status === 'pickup'    ? '234,179,8'
+              : state.robot.status === 'moving'    ? '59,130,246'
+              : '100,116,139';
+
+    const g = ctx.createRadialGradient(rx,ry,2,rx,ry,18);
+    g.addColorStop(0, `rgba(${rgb},0.55)`);
+    g.addColorStop(1, `rgba(${rgb},0)`);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(rx,ry,18,0,Math.PI*2); ctx.fill();
+
+    ctx.fillStyle = state.robot.status === 'moving'    ? '#3b82f6'
+                  : state.robot.status === 'refilling' ? '#22c55e'
+                  : state.robot.status === 'pickup'    ? '#eab308'
+                  : '#475569';
+    ctx.beginPath(); ctx.arc(rx,ry,9,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='white'; ctx.font='10px sans-serif';
+    ctx.textAlign='center'; ctx.fillText('🤖',rx,ry+4);
+  }
+}
+
+// ── Stock cards ────────────────────────────────────────────────
+function updateStockCards(state) {
+  const el     = document.getElementById('stock-cards');
+  const stocks = state.stocks;
+  let html = '';
+
+  for (const [key, s] of Object.entries(stocks)) {
+    const isSrc = s.role === 'source';
+    const pct   = Math.min(100, Math.round((s.current_stock / s.max_stock) * 100));
+
+    const barColor = isSrc ? '#3b82f6'
+      : s.alert_level === 'critical' ? '#ef4444'
+      : s.alert_level === 'warning'  ? '#f59e0b'
+      : '#22c55e';
+
+    const badge = isSrc
+      ? `<span class="badge badge-source">📦 Supply Source</span>`
+      : `<span class="badge badge-${s.alert_level}">
+           ${s.alert_level==='critical'?'🚨 Critical ≤30':s.alert_level==='warning'?'⚠️ Low — Dispatching':'✅ OK'}
+         </span>`;
+
+    const footerR = isSrc
+      ? (s.last_delivery ? `Last dispatch: ${s.last_delivery}` : 'No dispatch yet')
+      : (s.last_refill   ? `Last refill: ${s.last_refill}`     : 'Awaiting delivery');
+
+    // Pharmacy: hide quantity, show only name and role
+    const body = isSrc
+      ? `<div class="stock-val" style="color:${barColor};font-size:26px;letter-spacing:3px">—</div>
+         <div class="stock-lbl">Pharmacy · always stocked by staff<br>
+           <span style="font-size:10px;color:#60a5fa">▲ Robot loads supplies here</span>
+         </div>
+         <div style="font-size:11px;color:var(--muted);margin-top:4px">${footerR}</div>`
+      : `<div class="stock-val" style="color:${barColor}">${Math.round(s.current_stock)}</div>
+         <div class="stock-lbl">${s.name} · max 100 units
+           <span style="font-size:10px;color:var(--muted);margin-left:4px">▼ receives deliveries</span>
+         </div>
+         <div class="prog-bg"><div class="prog-fill" style="width:${pct}%;background:${barColor}"></div></div>
+         <div class="stock-foot"><span>${pct}% remaining</span><span>${footerR}</span></div>`;
+
+    html += `
+    <div class="stock-card ${isSrc?'':s.alert_level}" id="card-${key}">
+      <div class="stock-header"><span class="stock-icon">${s.icon}</span>${badge}</div>
+      ${body}
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+// ── Robot panel ────────────────────────────────────────────────
+function updateRobotPanel(robot) {
+  document.getElementById('rob-x').textContent    = robot.x.toFixed(2);
+  document.getElementById('rob-y').textContent    = robot.y.toFixed(2);
+  document.getElementById('rob-task').textContent = robot.current_task || '—';
+
+  const st      = document.getElementById('rob-status-text');
+  const em      = document.getElementById('rob-emoji');
+  const carrying = robot.carrying ?? 0;   // units robot is currently holding
+
+  // ── Status label ──
+  if (robot.status === 'moving' && carrying > 0) {
+    st.style.background='#1e3a5f'; st.style.color='#3b82f6';
+    st.textContent='🚗 Moving to Destination'; em.textContent='🏃';
+  } else if (robot.status === 'moving') {
+    st.style.background='#1e3a5f'; st.style.color='#3b82f6';
+    st.textContent='🚗 Moving'; em.textContent='🏃';
+  } else if (robot.status === 'pickup') {
+    st.style.background='#2d2200'; st.style.color='#eab308';
+    st.textContent='📦 Loading at Pharmacy'; em.textContent='📦';
+  } else if (robot.status === 'refilling') {
+    st.style.background='#052e16'; st.style.color='#22c55e';
+    st.textContent='⚡ Delivering Supplies'; em.textContent='🔄';
+  } else {
+    st.style.background='#1e293b'; st.style.color='#94a3b8';
+    st.textContent='⏸️ Idle at Pharmacy'; em.textContent='🤖';
+  }
+
+  // ── Carrying quantity display ──
+  const carryEl    = document.getElementById('rob-carrying');
+  const iconEl     = document.getElementById('rob-load-icon');
+  const textEl     = document.getElementById('rob-load-text');
+  const barEl      = document.getElementById('load-bar');
+  const MAX_CARRY  = 50;   // robot max load per trip
+  const pct        = Math.round((carrying / MAX_CARRY) * 100);
+
+  carryEl.textContent = carrying + ' units';
+
+  if (carrying > 0) {
+    carryEl.style.color = '#3b82f6';
+    iconEl.textContent  = '📦';
+    textEl.textContent  = `Carrying ${carrying} units → delivering to ${robot.current_task || '...'}`;
+    textEl.style.color  = '#3b82f6';
+    barEl.style.width      = pct + '%';
+    barEl.style.background = '#3b82f6';
+  } else if (robot.status === 'refilling') {
+    carryEl.style.color = '#22c55e';
+    iconEl.textContent  = '🔄';
+    textEl.textContent  = 'Unloading — delivering now';
+    textEl.style.color  = '#22c55e';
+    barEl.style.width      = '100%';
+    barEl.style.background = '#22c55e';
+  } else {
+    carryEl.style.color = 'var(--muted)';
+    iconEl.textContent  = '📭';
+    textEl.textContent  = 'Empty — idle at Pharmacy';
+    textEl.style.color  = 'var(--muted)';
+    barEl.style.width      = '0%';
+    barEl.style.background = 'var(--blue)';
+  }
+}
+
+// ── Alert bar ──────────────────────────────────────────────────
+function updateAlertBar(stocks) {
+  const dests  = Object.values(stocks).filter(s => s.role === 'destination');
+  const crits  = dests.filter(s => s.alert_level === 'critical');
+  const warns  = dests.filter(s => s.alert_level === 'warning');
+  const bar    = document.getElementById('alert-bar');
+
+  if (crits.length) {
+    bar.style.cssText='background:#2d0a0a;border:1px solid #7f1d1d;color:#ef4444;border-radius:8px;padding:10px 15px;font-size:13px;display:flex;align-items:center;gap:9px';
+    bar.innerHTML = `🚨 CRITICAL: ${crits.map(s=>s.name).join(', ')} — stock below 30! Robot dispatching now.`;
+  } else if (warns.length) {
+    bar.style.cssText='background:#2d1b00;border:1px solid #3d2d00;color:#f59e0b;border-radius:8px;padding:10px 15px;font-size:13px;display:flex;align-items:center;gap:9px';
+    bar.innerHTML = `⚡ PREDICTION: ${warns.map(s=>s.name).join(', ')} — ML model predicting refill (stock still above 30, robot dispatched early)`;
+  } else {
+    bar.style.cssText='background:#052e16;border:1px solid #14532d;color:#22c55e;border-radius:8px;padding:10px 15px;font-size:13px;display:flex;align-items:center;gap:9px';
+    bar.innerHTML = '✅ All destination stocks healthy — robot idle at Pharmacy';
+  }
+}
+
+// ── Poll every 2 seconds ───────────────────────────────────────
+async function poll() {
+  try {
+    const res   = await fetch('/api/state');
+    const state = await res.json();
+    currentState = state;
+    updateStockCards(state);
+    updateRobotPanel(state.robot);
+    updateAlertBar(state.stocks);
+    drawMap(state);
+  } catch(e) {
+    console.error('Poll error:', e);
+  }
+}
+
+poll();
+setInterval(poll, 2000);
+</script>
+</body>
+</html>
