@@ -1,0 +1,30 @@
+{
+  "features": [
+    "hour_of_day",
+    "patient_count",
+    "current_stock",
+    "shift",
+    "emergency_cases",
+    "prev_usage",
+    "day_of_week",
+    "room_type"
+  ],
+  "accuracy": 99.0,
+  "cv_f1_mean": 0.981,
+  "refill_threshold": 30,
+  "feature_importance": {
+    "hour_of_day": 0.029,
+    "patient_count": 0.0533,
+    "current_stock": 0.7625,
+    "shift": 0.0083,
+    "emergency_cases": 0.0173,
+    "prev_usage": 0.1003,
+    "day_of_week": 0.0173,
+    "room_type": 0.0119
+  },
+  "rooms": {
+    "0": "General Ward",
+    "1": "ICU",
+    "2": "Pharmacy"
+  }
+}

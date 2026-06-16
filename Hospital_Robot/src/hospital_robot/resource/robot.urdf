@@ -1,0 +1,195 @@
+<?xml version="1.0"?>
+<!--
+============================================================
+ROBOT URDF (Universal Robot Description Format)
+============================================================
+WHY URDF?
+- Defines the robot's physical structure for Gazebo simulation
+- ROS2 uses this to calculate joint positions, collisions, etc.
+
+ROBOT DESIGN:
+- Differential drive (2 wheels + 1 caster) - simple and reliable
+- Cylinder body (like a Roomba-style robot)
+- Lidar sensor for obstacle detection (optional, included for realism)
+============================================================
+-->
+<robot name="hospital_robot">
+
+  <!-- ─── BASE LINK ─── -->
+  <link name="base_footprint"/>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.1" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Robot body: flat cylinder -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.22" length="0.18"/>
+      </geometry>
+      <material name="robot_body">
+        <color rgba="0.2 0.5 0.9 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.22" length="0.18"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="3.0"/>
+      <inertia ixx="0.0505" ixy="0" ixz="0"
+               iyy="0.0505" iyz="0"
+               izz="0.0765"/>
+    </inertial>
+  </link>
+
+  <!-- ─── TOP INDICATOR LIGHT ─── -->
+  <joint name="light_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="top_light"/>
+    <origin xyz="0 0 0.12" rpy="0 0 0"/>
+  </joint>
+
+  <link name="top_light">
+    <visual>
+      <geometry><sphere radius="0.04"/></geometry>
+      <material name="light_green">
+        <color rgba="0.1 1.0 0.1 1.0"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- ─── LEFT WHEEL ─── -->
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <origin xyz="0 0.2 -0.06" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <link name="left_wheel">
+    <visual>
+      <geometry><cylinder radius="0.08" length="0.04"/></geometry>
+      <material name="wheel_dark">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.08" length="0.04"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.001" ixy="0" ixz="0"
+               iyy="0.001" iyz="0"
+               izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- ─── RIGHT WHEEL ─── -->
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <origin xyz="0 -0.2 -0.06" rpy="-1.5708 0 0"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <link name="right_wheel">
+    <visual>
+      <geometry><cylinder radius="0.08" length="0.04"/></geometry>
+      <material name="wheel_dark">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.08" length="0.04"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.3"/>
+      <inertia ixx="0.001" ixy="0" ixz="0"
+               iyy="0.001" iyz="0"
+               izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- ─── FRONT CASTER ─── -->
+  <joint name="caster_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="caster_wheel"/>
+    <origin xyz="0.18 0 -0.08" rpy="0 0 0"/>
+  </joint>
+
+  <link name="caster_wheel">
+    <visual>
+      <geometry><sphere radius="0.04"/></geometry>
+      <material name="caster_gray">
+        <color rgba="0.5 0.5 0.5 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry><sphere radius="0.04"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="0.1"/>
+      <inertia ixx="0.0001" ixy="0" ixz="0"
+               iyy="0.0001" iyz="0"
+               izz="0.0001"/>
+    </inertial>
+  </link>
+
+  <!-- ─── LIDAR (for realism, not required for A*) ─── -->
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar"/>
+    <origin xyz="0 0 0.12" rpy="0 0 0"/>
+  </joint>
+
+  <link name="lidar">
+    <visual>
+      <geometry><cylinder radius="0.04" length="0.03"/></geometry>
+      <material name="lidar_black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+  </link>
+
+  <!-- ─── GAZEBO PLUGINS ─── -->
+
+  <!-- Differential drive controller -->
+  <gazebo>
+    <plugin name="differential_drive_controller"
+            filename="libgazebo_ros_diff_drive.so">
+      <update_rate>30</update_rate>
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <wheel_separation>0.4</wheel_separation>
+      <wheel_diameter>0.16</wheel_diameter>
+      <max_wheel_torque>20</max_wheel_torque>
+      <max_wheel_acceleration>1.0</max_wheel_acceleration>
+      <command_topic>cmd_vel</command_topic>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>true</publish_wheel_tf>
+      <odometry_topic>odom</odometry_topic>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
+    </plugin>
+  </gazebo>
+
+  <!-- Robot base color in Gazebo -->
+  <gazebo reference="base_link">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <gazebo reference="left_wheel">
+    <material>Gazebo/DarkGray</material>
+  </gazebo>
+
+  <gazebo reference="right_wheel">
+    <material>Gazebo/DarkGray</material>
+  </gazebo>
+
+</robot>
