@@ -1,0 +1,3 @@
+[console_scripts]
+robot_node = hospital_robot.robot_node:main
+
